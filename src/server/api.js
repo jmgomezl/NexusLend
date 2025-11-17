@@ -99,7 +99,7 @@ server.post('/lending/repay', async (request) => {
   return lendingService.repay({ accountId, amount: Number(amount) });
 });
 
-const port = Number(process.env.API_PORT || 4000);
+const port = Number(process.env.PORT || process.env.API_PORT || 4000);
 const host = process.env.API_HOST || '0.0.0.0';
 
 server
