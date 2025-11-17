@@ -4,10 +4,11 @@ import { api } from './api.js';
 import { WalletPanel } from './components/WalletPanel.jsx';
 import { TxControls } from './components/TxControls.jsx';
 import { PositionTable } from './components/PositionTable.jsx';
+import { MetricsGrid } from './components/MetricsGrid.jsx';
 
 export default function App() {
   const { accountId, status, requestPairing, setAccountId } = useHashConnect('testnet');
-  const [metrics, setMetrics] = useState({ accounts: 0, supplied: 0, borrowed: 0, sample: [] });
+  const [metrics, setMetrics] = useState({ accounts: 0, supplied: 0, borrowed: 0, sample: [], averageHealth: '--' });
   const [positions, setPositions] = useState([]);
   const [kycLog, setKycLog] = useState('');
   const [txLog, setTxLog] = useState('');
@@ -18,6 +19,16 @@ export default function App() {
       setMetrics(info);
       const rows = await Promise.all((info.sample || []).map((id) => api.getPosition(id)));
       setPositions(rows);
+      if (rows.length) {
+        const avg =
+          rows
+            .map((entry) => Number(entry.healthFactor))
+            .filter((value) => Number.isFinite(value))
+            .reduce((acc, value) => acc + value, 0) / rows.length;
+        setMetrics({ ...info, averageHealth: avg ? avg.toFixed(2) : '--' });
+      } else {
+        setMetrics(info);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -90,12 +101,12 @@ export default function App() {
         <TxControls disabled={!accountId} onSupply={handleSupply} onBorrow={handleBorrow} onRepay={handleRepay} logMessage={txLog} />
       </div>
       <main>
-        <div className="panel">
-          <h2>Pool Metrics</h2>
-          <div style={{ fontSize: '1.2rem', fontWeight: 500 }}>
-            Accounts: {metrics.accounts} | Supplied: {metrics.supplied} | Borrowed: {metrics.borrowed}
-          </div>
-        </div>
+        <MetricsGrid
+          accounts={metrics.accounts}
+          supplied={metrics.supplied}
+          borrowed={metrics.borrowed}
+          healthStats={{ average: metrics.averageHealth }}
+        />
         <PositionTable positions={positions} />
       </main>
     </div>

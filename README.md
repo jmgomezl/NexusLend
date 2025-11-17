@@ -53,6 +53,8 @@ Feature-complete hackathon reference showcasing Hedera-native compliance (HTS KY
 2. Associate token `0.0.7266311` inside HashPack, then press **Request KYC** on the dashboard; the backend uses `KYC_PRIVATE_KEY` (or `OPERATOR_KEY`) to submit `TokenGrantKycTransaction`.
 3. Use the Supply / Borrow / Repay forms to call the `/lending/*` API routes; the UI shows success/failure logs and updates pool metrics/positions automatically.
 
+The dashboard now includes a summary analytics grid (accounts, supplied, borrowed, average health factor) plus a [demo script](docs/DEMO_SCRIPT.md) outlining the suggested presentation flow.
+
 ## Testing
 ```bash
 npm test
@@ -79,3 +81,5 @@ Jest exercises lending math, liquidation workflows, config bootstrapping, and mo
 2. Set the Root Directory to the project root and use `npm install && npm run build && npm run api` or simply `npm install && npm run api` as the Start Command.
 3. Add environment variables in Render (OPERATOR_ID, OPERATOR_KEY, KYC_PRIVATE_KEY, NETWORK=testnet, etc.).
 4. Once Render deploys the Fastify API, update the Vite dashboard build (`VITE_API_BASE=https://your-render-url npm run build`) and deploy the `dist/` folder (e.g., GitHub Pages).
+
+For GitHub Pages: set `base: '/NexusLend/'` in `dashboard-app/vite.config.js`, run the Vite build with the Render API URL, copy `dashboard-app/dist` into the repo’s `docs/` folder, and enable Pages → “main /docs”.
