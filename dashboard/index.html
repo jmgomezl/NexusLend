@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>NexusLend • Hedera DeFi Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="module">
+      import('./vendor/hashconnect/dist/main.js')
+        .then((mod) => {
+          const HashConnectClass = mod.HashConnect || mod.default;
+          if (HashConnectClass) {
+            window.HashConnect = HashConnectClass;
+          }
+        })
+        .catch((error) => {
+          console.warn('Unable to load HashConnect bundle', error);
+        });
+    </script>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #1d1b4b 0%, #070a1a 60%);
+        color: #e2e8f0;
+        padding: 2rem;
+      }
+      .page {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      header.hero {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .panel {
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 18px;
+        padding: 1.5rem;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(12px);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .brand-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #5ee7df, #b490ca);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      .brand h1 {
+        margin: 0;
+        font-size: 2rem;
+      }
+      .tagline {
+        margin-top: 0.5rem;
+        color: #c9d7ff;
+      }
+      .actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      button,
+      input,
+      select {
+        padding: 0.55rem 0.9rem;
+        border-radius: 999px;
+        border: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      button {
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        color: #fff;
+        cursor: pointer;
+        transition: transform 0.15s ease, opacity 0.15s ease;
+      }
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      input,
+      select {
+        background: rgba(15, 23, 42, 0.9);
+        color: #e2e8f0;
+        border: 1px solid rgba(226, 232, 240, 0.2);
+        border-radius: 12px;
+      }
+      main {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 0.6rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      }
+      th {
+        text-align: left;
+        color: #94a3b8;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+      }
+      .muted {
+        color: #94a3b8;
+        font-size: 0.85rem;
+      }
+      .log {
+        font-size: 0.85rem;
+        min-height: 1.2rem;
+        margin-top: 0.5rem;
+        color: #cbd5f5;
+      }
+      form {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .two-column {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div class="panel">
+          <div class="brand">
+            <div class="brand-logo">NX</div>
+            <div>
+              <h1>NexusLend</h1>
+              <p class="tagline">Hedera-native borrow/lend with embeddable KYC</p>
+            </div>
+          </div>
+          <p class="muted" id="status">Connecting...</p>
+          <div class="actions">
+            <button id="connectWallet">Connect HashPack</button>
+            <button id="refresh" style="background: rgba(148, 163, 184, 0.2)">Refresh</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Wallet & Access</h2>
+          <p>Connected account: <strong id="accountId">Not connected</strong></p>
+          <label class="muted">
+            Manual override
+            <input id="manualAccount" placeholder="0.0.xxxxxx" />
+          </label>
+          <p class="muted">
+            Associate token <code>0.0.7266311</code> in HashPack, then request KYC to unlock borrowing.
+          </p>
+          <button id="kycButton" disabled>Request KYC</button>
+          <div class="log" id="kycLog"></div>
+        </div>
+      </header>
+
+      <main>
+        <div class="panel">
+          <h2>Supply / Borrow Controls</h2>
+          <div class="muted">Amounts are denominated in the reserve token</div>
+          <form id="supplyForm">
+            <label>Amount <input name="amount" type="number" min="0" step="1" required /></label>
+            <button type="submit" disabled>Supply</button>
+          </form>
+          <form id="borrowForm">
+            <label>Amount <input name="amount" type="number" min="0" step="1" required /></label>
+            <button type="submit" disabled>Borrow</button>
+          </form>
+          <form id="repayForm">
+            <label>Amount <input name="amount" type="number" min="0" step="1" required /></label>
+            <button type="submit" disabled>Repay</button>
+          </form>
+          <div class="log" id="txLog"></div>
+        </div>
+        <div class="panel">
+          <h2>Pool Metrics</h2>
+          <div id="metrics" style="font-size: 1.1rem; font-weight: 500">--</div>
+        </div>
+      </main>
+
+      <section class="panel">
+        <h2>Tracked Positions</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Account</th>
+              <th>Supplied</th>
+              <th>Borrowed</th>
+              <th>Health</th>
+            </tr>
+          </thead>
+          <tbody id="positions"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <script>
+      const API_BASE = window.API_BASE || 'http://localhost:4000';
+      const statusEl = document.getElementById('status');
+      const metricsEl = document.getElementById('metrics');
+      const positionsEl = document.getElementById('positions');
+      const accountDisplay = document.getElementById('accountId');
+      const manualAccountInput = document.getElementById('manualAccount');
+      const kycButton = document.getElementById('kycButton');
+      const kycLog = document.getElementById('kycLog');
+      const txLog = document.getElementById('txLog');
+      const supplyForm = document.getElementById('supplyForm');
+      const borrowForm = document.getElementById('borrowForm');
+      const repayForm = document.getElementById('repayForm');
+
+      const state = {
+        accountId: '',
+        hashconnect: null,
+        pairingData: null
+      };
+
+      function setAccount(accountId) {
+        state.accountId = accountId;
+        accountDisplay.textContent = accountId || 'Not connected';
+        const disabled = !accountId;
+        [kycButton, supplyForm.querySelector('button'), borrowForm.querySelector('button'), repayForm.querySelector('button')].forEach(
+          (btn) => (btn.disabled = disabled)
+        );
+      }
+
+      function logStatus(el, message, isError = false) {
+        el.textContent = message;
+        el.style.color = isError ? '#f87171' : '#a5f3fc';
+      }
+
+      async function fetchJson(path, options = {}) {
+        const response = await fetch(`${API_BASE}${path}`, {
+          headers: { 'Content-Type': 'application/json' },
+          ...options
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || `Request failed: ${response.status}`);
+        }
+        return response.json();
+      }
+
+      async function loadMetrics() {
+        const metrics = await fetchJson('/metrics');
+        metricsEl.textContent = `Accounts: ${metrics.accounts} | Supplied: ${metrics.supplied} | Borrowed: ${metrics.borrowed}`;
+        return metrics.sample || [];
+      }
+
+      async function loadPositions() {
+        positionsEl.innerHTML = '';
+        const accounts = await loadMetrics();
+        await Promise.all(
+          accounts.map(async (accountId) => {
+            if (!accountId) return;
+            const data = await fetchJson(`/positions/${accountId}`);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${data.accountId}</td>
+              <td>${Number(data.position.supplied).toFixed(2)}</td>
+              <td>${Number(data.position.borrowed).toFixed(2)}</td>
+              <td>${Number(data.healthFactor).toFixed(2)}</td>
+            `;
+            positionsEl.appendChild(row);
+          })
+        );
+      }
+
+      async function refresh() {
+        try {
+          statusEl.textContent = 'Updating...';
+          await loadPositions();
+          statusEl.textContent = `Last updated ${new Date().toLocaleTimeString()}`;
+        } catch (error) {
+          statusEl.textContent = error.message;
+        }
+      }
+
+      async function requestKyc() {
+        if (!state.accountId) {
+          return logStatus(kycLog, 'Connect wallet or enter account ID first', true);
+        }
+        try {
+          logStatus(kycLog, 'Requesting KYC...');
+          const result = await fetchJson('/kyc/request', {
+            method: 'POST',
+            body: JSON.stringify({ accountId: state.accountId })
+          });
+          logStatus(kycLog, `KYC status: ${result.status}`);
+        } catch (error) {
+          logStatus(kycLog, error.message, true);
+        }
+      }
+
+      function handleTx(form, endpoint) {
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          if (!state.accountId) {
+            return logStatus(txLog, 'Connect wallet first', true);
+          }
+          const formData = new FormData(form);
+          const amount = Number(formData.get('amount'));
+          if (!amount || amount <= 0) {
+            return logStatus(txLog, 'Enter a valid amount', true);
+          }
+          try {
+            logStatus(txLog, 'Submitting transaction...');
+            const result = await fetchJson(endpoint, {
+              method: 'POST',
+              body: JSON.stringify({ accountId: state.accountId, amount })
+            });
+            logStatus(txLog, `Success: supplied ${Number(result.supplied || result.position?.supplied || result.amount || 0)}, borrowed ${Number(
+              result.borrowed || result.position?.borrowed || 0
+            )}`);
+            form.reset();
+            refresh();
+          } catch (error) {
+            logStatus(txLog, error.message, true);
+          }
+        });
+      }
+
+      document.getElementById('refresh').addEventListener('click', refresh);
+      manualAccountInput.addEventListener('change', (event) => {
+        setAccount(event.target.value.trim());
+      });
+      kycButton.addEventListener('click', requestKyc);
+      handleTx(supplyForm, '/lending/supply');
+      handleTx(borrowForm, '/lending/borrow');
+      handleTx(repayForm, '/lending/repay');
+
+      function getHashConnectClass() {
+        const globalAny = window.HashConnect || window.hashconnect || window.Hashconnect || window.HashConnect?.HashConnect;
+        if (!globalAny) {
+          return null;
+        }
+        if (typeof globalAny === 'function') {
+          return globalAny;
+        }
+        if (typeof globalAny.default === 'function') {
+          return globalAny.default;
+        }
+        if (typeof globalAny.HashConnect === 'function') {
+          return globalAny.HashConnect;
+        }
+        return null;
+      }
+
+      async function connectWallet() {
+        const HashConnectClass = getHashConnectClass();
+        if (!HashConnectClass) {
+          logStatus(txLog, 'HashConnect UMD bundle not loaded; pair manually by entering your account.', true);
+          return;
+        }
+        try {
+          const metadata = {
+            name: 'Hedera Lending Dashboard',
+            description: 'Borrow/Lend demo',
+            icon: 'https://hashpack.app/img/logo.svg'
+          };
+          state.hashconnect = new HashConnectClass();
+          const initData = await state.hashconnect.init(metadata, 'testnet', true);
+          if (initData.savedPairings.length) {
+            const pairing = initData.savedPairings[0];
+            setAccount(pairing.accountIds[0]);
+            logStatus(txLog, 'Reconnected to HashPack');
+            return;
+          }
+          state.hashconnect.foundExtensionEvent.once((ext) => {
+            state.hashconnect.connectToLocalWallet(initData.pairingString, ext);
+          });
+          state.hashconnect.pairingEvent.once((pairingData) => {
+            state.pairingData = pairingData;
+            const accountId = pairingData.accountIds[0];
+            setAccount(accountId);
+            logStatus(txLog, 'Wallet connected via HashPack');
+          });
+          await state.hashconnect.connectToLocalWallet(initData.pairingString);
+        } catch (error) {
+          logStatus(txLog, error.message, true);
+        }
+      }
+
+      document.getElementById('connectWallet').addEventListener('click', connectWallet);
+      refresh();
+    </script>
+  </body>
+</html>

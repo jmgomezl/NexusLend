@@ -1,0 +1,8 @@
+{
+  "network": "local",
+  "node": "127.0.0.1:50211",
+  "mirrorNode": "http://localhost:5551",
+  "kycTokenId": "0.0.1001",
+  "reserveTokenId": "0.0.1002",
+  "loanTopicId": "0.0.1003"
+}

@@ -1,0 +1,8 @@
+{
+  "network": "testnet",
+  "mirrorNode": "https://testnet.mirrornode.hedera.com",
+  "kycTokenId": "0.0.7266311",
+  "reserveTokenId": "0.0.7266311",
+  "loanTopicId": "0.0.7266346",
+  "lendingPoolContractId": "0.0.7266732"
+}

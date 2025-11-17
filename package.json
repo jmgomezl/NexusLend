@@ -1,0 +1,46 @@
+{
+  "name": "hedera-defi",
+  "version": "0.1.0",
+  "description": "Reference Hedera-based DeFi lending & borrowing prototype with native KYC enforcement.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon --watch src --ext js src/index.js",
+    "start": "node src/index.js",
+    "api": "NODE_ENV=${NODE_ENV:-development} node src/server/api.js",
+    "monitor": "node scripts/runHealthMonitor.js",
+    "compile": "hardhat --config hardhat.config.cjs compile",
+    "deploy:testnet": "node scripts/deployContract.js",
+    "build": "echo 'Build step handled by scripts/compile if using TS'",
+    "test": "node scripts/runTests.mjs",
+    "lint": "eslint --ext .js src tests scripts",
+    "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\" scripts/*.js"
+  },
+  "keywords": [
+    "hedera",
+    "defi",
+    "kyc",
+    "lending"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@hashgraph/sdk": "^2.47.0",
+    "commander": "^11.1.0",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.28.1",
+    "hashconnect": "^3.0.14",
+    "pino": "^9.1.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "ethers": "^6.9.0",
+    "hardhat": "^2.22.5",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.3",
+    "prettier": "^3.3.3"
+  }
+}
