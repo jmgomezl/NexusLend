@@ -73,3 +73,9 @@ Jest exercises lending math, liquidation workflows, config bootstrapping, and mo
 ## Next Steps
 - Plug real HTS token transfers into `LendingPool` (currently stubbed) or extend with Hedera Native Token Service precompiles.
 - Emit structured events to a Hedera Consensus Service topic for on-chain audit logs and integrate wallet onboarding (HashPack deep links).
+
+## Deployment on Render
+1. Create a new Web Service on https://render.com, selecting your GitHub repository.
+2. Set the Root Directory to the project root and use `npm install && npm run build && npm run api` or simply `npm install && npm run api` as the Start Command.
+3. Add environment variables in Render (OPERATOR_ID, OPERATOR_KEY, KYC_PRIVATE_KEY, NETWORK=testnet, etc.).
+4. Once Render deploys the Fastify API, update the Vite dashboard build (`VITE_API_BASE=https://your-render-url npm run build`) and deploy the `dist/` folder (e.g., GitHub Pages).
