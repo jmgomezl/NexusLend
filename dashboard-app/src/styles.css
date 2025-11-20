@@ -283,6 +283,10 @@ input:focus {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
+.hero-grid > .panel {
+  min-height: 100%;
+}
+
 .section-heading {
   display: flex;
   justify-content: space-between;
@@ -632,5 +636,76 @@ code {
   }
   .actions button {
     flex: 1;
+  }
+
+  .metrics-grid,
+  .incentive-grid,
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .incentive-strip {
+    margin-top: 1rem;
+  }
+
+  .pairing-actions {
+    flex-direction: column;
+  }
+
+  .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .panel.positions-panel {
+    padding: 1rem 1.2rem;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+  }
+
+  .metric-value {
+    font-size: 1.4rem;
+  }
+
+  .brand {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 900px) {
+  .top-bar {
+    position: sticky;
+    top: 1rem;
+    z-index: 2;
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 1rem;
+  }
+
+  .panel {
+    padding: 1rem;
+  }
+
+  .brand-logo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .table-wrapper {
+    margin: 0 -0.5rem;
   }
 }
