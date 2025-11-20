@@ -5,15 +5,22 @@ import { WalletPanel } from './components/WalletPanel.jsx';
 import { TxControls } from './components/TxControls.jsx';
 import { PositionTable } from './components/PositionTable.jsx';
 import { AboutPanel } from './components/AboutPanel.jsx';
+import { OnboardingPanel } from './components/OnboardingPanel.jsx';
 import { MetricsGrid } from './components/MetricsGrid.jsx';
+import { IncentiveStrip } from './components/IncentiveStrip.jsx';
 
 export default function App() {
-  const { accountId, status, requestPairing, setAccountId } = useHashConnect('testnet');
+  const { accountId, status, requestPairing, setAccountId, pairingString } = useHashConnect('testnet');
   const [metrics, setMetrics] = useState({ accounts: 0, supplied: 0, borrowed: 0, sample: [], averageHealth: '--' });
   const [positions, setPositions] = useState([]);
   const [kycLog, setKycLog] = useState('');
   const [txLog, setTxLog] = useState('');
   const [walletInfo, setWalletInfo] = useState({ kyc: 'UNKNOWN', hbar: '--', reserve: '--' });
+  const [lastUpdated, setLastUpdated] = useState('');
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'dark';
+    return window.localStorage.getItem('nexus-theme') || 'dark';
+  });
 
   async function loadData() {
     try {
@@ -30,6 +37,7 @@ export default function App() {
       } else {
         setMetrics(info);
       }
+      setLastUpdated(new Date().toLocaleTimeString());
     } catch (error) {
       console.error(error);
     }
@@ -60,6 +68,17 @@ export default function App() {
       }
     })();
   }, [accountId]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const classList = document.body.classList;
+    classList.remove('theme-dark', 'theme-light');
+    classList.add(`theme-${theme}`);
+    document.body.setAttribute('data-theme', theme);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('nexus-theme', theme);
+    }
+  }, [theme]);
 
   const handleKyc = async () => {
     if (!accountId) return setKycLog('Connect wallet or enter account ID first');
@@ -109,10 +128,78 @@ export default function App() {
   };
 
   const tokenSymbol = api.tokenSymbol;
+  const statusMessage = lastUpdated ? `Last sync ${lastUpdated}` : `HashConnect status: ${status}`;
+  const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  const incentiveData = [
+    {
+      label: 'Supply Yield',
+      value: '4.8% APY',
+      description: 'Earn protocol share + NXL drip on every deposit.'
+    },
+    {
+      label: 'Borrow APR',
+      value: '6.2% APR',
+      description: 'Interest accrues per block; repay anytime.'
+    },
+    {
+      label: 'Protocol Fee',
+      value: '0.35%',
+      description: 'Captured from interest to fund reserves + monitoring.'
+    }
+  ];
 
   return (
-    <div className="page">
-      <div className="hero">
+    <>
+      <div className="background-canvas" aria-hidden="true">
+        <span className="bg-orb orb-one"></span>
+        <span className="bg-orb orb-two"></span>
+        <span className="bg-orb orb-three"></span>
+      </div>
+      <div className="page">
+        <nav className="top-bar panel">
+        <div className="brand">
+          <div className="brand-logo">NX</div>
+          <div>
+            <h1>NexusLend</h1>
+            <p className="tagline">Hedera-native borrow/lend with embeddable KYC</p>
+          </div>
+        </div>
+        <div className="top-meta">
+          <p className="muted">{statusMessage}</p>
+          <div className="actions">
+            <button onClick={requestPairing}>Connect HashPack</button>
+            <button onClick={loadData} className="ghost">
+              Refresh
+            </button>
+            <button
+              onClick={toggleTheme}
+              className="ghost icon-button"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              aria-pressed={theme === 'light'}
+              type="button"
+            >
+              <span aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <section className="hero-grid">
+        <article className="panel overview-panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Protocol Pulse</p>
+              <h2>Liquidity snapshot</h2>
+            </div>
+          </div>
+          <MetricsGrid
+            accounts={metrics.accounts}
+            supplied={metrics.supplied}
+            borrowed={metrics.borrowed}
+            healthStats={{ average: metrics.averageHealth }}
+          />
+        </article>
+
         <WalletPanel
           accountId={accountId}
           status={status}
@@ -121,7 +208,20 @@ export default function App() {
           onConnect={requestPairing}
           onRequestKyc={handleKyc}
           logMessage={kycLog}
+          pairingString={pairingString}
         />
+      </section>
+
+      <IncentiveStrip incentives={incentiveData} tokenSymbol={tokenSymbol} />
+
+      <section className="panel control-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Treasury Actions</p>
+            <h2>Manage liquidity</h2>
+          </div>
+        </div>
+        <p className="muted">Amounts are denominated in the reserve token ({tokenSymbol}).</p>
         <TxControls
           disabled={!accountId}
           onSupply={handleSupply}
@@ -130,16 +230,23 @@ export default function App() {
           logMessage={txLog}
           tokenSymbol={tokenSymbol}
         />
-      </div>
-      <main>
-        <MetricsGrid
-          accounts={metrics.accounts}
-          supplied={metrics.supplied}
-          borrowed={metrics.borrowed}
-          healthStats={{ average: metrics.averageHealth }}
-        />
+      </section>
+
+      <section className="panel positions-panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Portfolio Radar</p>
+            <h2>Tracked positions</h2>
+          </div>
+        </div>
         <PositionTable positions={positions} />
-      </main>
-    </div>
+      </section>
+
+      <section className="two-column">
+        <OnboardingPanel tokenSymbol={tokenSymbol} />
+        <AboutPanel tokenSymbol={tokenSymbol} />
+      </section>
+      </div>
+    </>
   );
 }

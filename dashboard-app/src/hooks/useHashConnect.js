@@ -10,6 +10,7 @@ const APP_METADATA = {
 export function useHashConnect(network = 'testnet') {
   const [hashconnect, setHashconnect] = useState(null);
   const [pairing, setPairing] = useState(null);
+  const [pairingString, setPairingString] = useState('');
   const [accountId, setAccountId] = useState('');
   const [status, setStatus] = useState('DISCONNECTED');
 
@@ -21,6 +22,7 @@ export function useHashConnect(network = 'testnet') {
         const initData = await hc.init(APP_METADATA, network, false);
         if (!mounted) return;
         setHashconnect(hc);
+        setPairingString(initData.pairingString);
         setStatus('READY');
         if (initData.savedPairings?.length) {
           const existing = initData.savedPairings[0];
@@ -50,10 +52,10 @@ export function useHashConnect(network = 'testnet') {
   }, [network]);
 
   const requestPairing = useCallback(() => {
-    if (!hashconnect) return;
+    if (!hashconnect || !pairingString) return;
     setStatus('PAIRING');
-    hashconnect.connectToLocalWallet();
-  }, [hashconnect]);
+    hashconnect.connectToLocalWallet(pairingString);
+  }, [hashconnect, pairingString]);
 
-  return { hashconnect, pairing, accountId, status, requestPairing, setAccountId };
+  return { hashconnect, pairing, pairingString, accountId, status, requestPairing, setAccountId };
 }

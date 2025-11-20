@@ -17,6 +17,7 @@
         });
     </script>
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
       :root {
         color-scheme: dark;
         font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -27,51 +28,64 @@
       body {
         margin: 0;
         min-height: 100vh;
-        background: radial-gradient(circle at top, #1d1b4b 0%, #070a1a 60%);
+        padding: 2rem clamp(1.5rem, 4vw, 3.5rem);
+        background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.35), transparent 45%),
+          radial-gradient(circle at 80% 0%, rgba(56, 189, 248, 0.25), transparent 35%), #030617;
         color: #e2e8f0;
-        padding: 2rem;
       }
       .page {
         max-width: 1200px;
         margin: 0 auto;
-      }
-      header.hero {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        display: flex;
+        flex-direction: column;
         gap: 1.5rem;
-        margin-bottom: 1.5rem;
       }
       .panel {
-        background: rgba(15, 23, 42, 0.75);
-        border: 1px solid rgba(99, 102, 241, 0.2);
-        border-radius: 18px;
-        padding: 1.5rem;
-        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.4);
-        backdrop-filter: blur(12px);
+        background: rgba(6, 11, 25, 0.85);
+        border: 1px solid rgba(99, 102, 241, 0.25);
+        border-radius: 22px;
+        padding: 1.75rem;
+        box-shadow: 0 25px 60px rgba(2, 6, 23, 0.55);
+        backdrop-filter: blur(18px);
+      }
+      .top-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
       }
       .brand {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 1rem;
       }
       .brand-logo {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #5ee7df, #b490ca);
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: linear-gradient(145deg, #5ee7df, #7f7aff, #b490ca);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
         letter-spacing: 1px;
+        color: #030617;
+        font-size: 1.1rem;
       }
       .brand h1 {
         margin: 0;
-        font-size: 2rem;
+        font-size: clamp(1.75rem, 3vw, 2.4rem);
       }
       .tagline {
-        margin-top: 0.5rem;
+        margin: 0.35rem 0 0;
         color: #c9d7ff;
+        font-size: 0.95rem;
+      }
+      .top-meta {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
       }
       .actions {
         display: flex;
@@ -79,154 +93,360 @@
         flex-wrap: wrap;
       }
       button,
-      input,
-      select {
-        padding: 0.55rem 0.9rem;
-        border-radius: 999px;
-        border: none;
+      input {
         font-size: 0.95rem;
         font-weight: 500;
+        border-radius: 999px;
+        border: none;
       }
       button {
-        background: linear-gradient(135deg, #6366f1, #a855f7);
+        padding: 0.65rem 1.25rem;
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
         color: #fff;
         cursor: pointer;
-        transition: transform 0.15s ease, opacity 0.15s ease;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+        box-shadow: 0 12px 30px rgba(124, 58, 237, 0.35);
       }
       button:hover:not(:disabled) {
         transform: translateY(-2px);
+        box-shadow: 0 18px 35px rgba(124, 58, 237, 0.4);
       }
       button:disabled {
-        opacity: 0.5;
+        opacity: 0.4;
         cursor: not-allowed;
+        box-shadow: none;
       }
-      input,
-      select {
-        background: rgba(15, 23, 42, 0.9);
+      .ghost {
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        box-shadow: none;
+      }
+      input {
+        padding: 0.65rem 1rem;
+        background: rgba(4, 13, 33, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.25);
         color: #e2e8f0;
-        border: 1px solid rgba(226, 232, 240, 0.2);
-        border-radius: 12px;
-      }
-      main {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 1.5rem;
-      }
-      table {
         width: 100%;
-        border-collapse: collapse;
       }
-      th,
-      td {
-        padding: 0.6rem;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      .hero-grid {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       }
-      th {
-        text-align: left;
+      .section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
+      .eyebrow {
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: #8b97c9;
+        margin: 0 0 0.35rem;
+      }
+      h2 {
+        margin: 0;
+        font-size: 1.25rem;
+      }
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+      }
+      .metric-card {
+        padding: 1.1rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(140deg, rgba(99, 102, 241, 0.15), rgba(13, 17, 38, 0.9));
+      }
+      .metric-label {
+        margin: 0;
+        font-size: 0.8rem;
         color: #94a3b8;
-        font-size: 0.85rem;
-        letter-spacing: 1px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .metric-value {
+        font-size: 1.7rem;
+        font-weight: 600;
+        margin: 0.35rem 0 0;
+      }
+      .metric-subtext {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        margin: 0.2rem 0 0;
       }
       .muted {
         color: #94a3b8;
+        font-size: 0.9rem;
+      }
+      .wallet-panel p {
+        margin: 0.35rem 0;
+      }
+      .helper {
         font-size: 0.85rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+      }
+      .control-section .muted {
+        margin-bottom: 1rem;
+      }
+      .controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+      .control-card {
+        border-radius: 18px;
+        padding: 1.25rem;
+        background: rgba(11, 15, 35, 0.85);
+        border: 1px solid rgba(99, 102, 241, 0.12);
+      }
+      .control-card h3 {
+        margin: 0 0 0.9rem;
+        font-size: 1.05rem;
+      }
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+      label span {
+        display: block;
+        font-size: 0.85rem;
+        color: #9ca3af;
+        margin-bottom: 0.35rem;
       }
       .log {
         font-size: 0.85rem;
         min-height: 1.2rem;
         margin-top: 0.5rem;
+      }
+      .log-box {
+        border-radius: 16px;
+        border: 1px dashed rgba(148, 163, 184, 0.35);
+        background: rgba(10, 15, 30, 0.65);
+        padding: 0.85rem 1rem;
+        margin-top: 1rem;
         color: #cbd5f5;
       }
-      form {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        margin-top: 0.5rem;
-        flex-wrap: wrap;
+      table {
+        width: 100%;
+        border-collapse: collapse;
       }
-      .two-column {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
+      th {
+        text-align: left;
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #94a3b8;
+        padding-bottom: 0.75rem;
+      }
+      td {
+        padding: 0.9rem 0 0.9rem 0;
+        border-top: 1px solid rgba(148, 163, 184, 0.2);
+      }
+      .table-wrapper {
+        overflow-x: auto;
+        margin-top: 0.75rem;
+      }
+      .pill {
+        padding: 0.2rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .pill.good {
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+      }
+      .pill.warn {
+        background: rgba(250, 204, 21, 0.15);
+        color: #facc15;
+      }
+      .pill.danger {
+        background: rgba(248, 113, 113, 0.15);
+        color: #f87171;
+      }
+      .amount {
+        font-size: 1.05rem;
+        font-weight: 600;
+      }
+      .account-id {
+        font-weight: 600;
+        font-size: 1rem;
+      }
+      .micro {
+        font-size: 0.75rem;
+        color: #94a3b8;
+      }
+      code {
+        background: rgba(15, 23, 42, 0.6);
+        padding: 0.1rem 0.35rem;
+        border-radius: 6px;
+      }
+      @media (max-width: 640px) {
+        body {
+          padding: 1.5rem;
+        }
+        .panel {
+          padding: 1.25rem;
+        }
+        .top-meta {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .actions {
+          width: 100%;
+        }
+        .actions button {
+          flex: 1;
+        }
       }
     </style>
   </head>
   <body>
     <div class="page">
-      <header class="hero">
-        <div class="panel">
-          <div class="brand">
-            <div class="brand-logo">NX</div>
-            <div>
-              <h1>NexusLend</h1>
-              <p class="tagline">Hedera-native borrow/lend with embeddable KYC</p>
-            </div>
+      <nav class="top-bar panel">
+        <div class="brand">
+          <div class="brand-logo">NX</div>
+          <div>
+            <h1>NexusLend</h1>
+            <p class="tagline">Hedera-native borrow/lend with embeddable KYC</p>
           </div>
+        </div>
+        <div class="top-meta">
           <p class="muted" id="status">Connecting...</p>
           <div class="actions">
             <button id="connectWallet">Connect HashPack</button>
-            <button id="refresh" style="background: rgba(148, 163, 184, 0.2)">Refresh</button>
+            <button id="refresh" class="ghost">Refresh</button>
           </div>
         </div>
-        <div class="panel">
-          <h2>Wallet & Access</h2>
+      </nav>
+
+      <section class="hero-grid">
+        <article class="panel overview-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Protocol Pulse</p>
+              <h2>Liquidity snapshot</h2>
+            </div>
+          </div>
+          <div id="metrics" class="metrics-grid">
+            <div class="metric-card">
+              <p class="metric-label">Active Accounts</p>
+              <p class="metric-value" data-metric="accounts">--</p>
+              <p class="metric-subtext">Wallets observed by monitor</p>
+            </div>
+            <div class="metric-card">
+              <p class="metric-label">Total Supplied</p>
+              <p class="metric-value" data-metric="supplied">--</p>
+              <p class="metric-subtext">Reserve tokens deposited</p>
+            </div>
+            <div class="metric-card">
+              <p class="metric-label">Total Borrowed</p>
+              <p class="metric-value" data-metric="borrowed">--</p>
+              <p class="metric-subtext">Credit drawn from pool</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel wallet-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Wallet & Access</p>
+              <h2>Connect credentials</h2>
+            </div>
+          </div>
           <p>Connected account: <strong id="accountId">Not connected</strong></p>
-          <label class="muted">
-            Manual override
+          <label>
+            <span>Manual override</span>
             <input id="manualAccount" placeholder="0.0.xxxxxx" />
           </label>
-          <p class="muted">
+          <p class="helper">
             Associate token <code>0.0.7266311</code> in HashPack, then request KYC to unlock borrowing.
           </p>
           <button id="kycButton" disabled>Request KYC</button>
-          <div class="log" id="kycLog"></div>
-        </div>
-      </header>
+          <div class="log log-box" id="kycLog"></div>
+        </article>
+      </section>
 
-      <main>
-        <div class="panel">
-          <h2>Supply / Borrow Controls</h2>
-          <div class="muted">Amounts are denominated in the reserve token</div>
-          <form id="supplyForm">
-            <label>Amount <input name="amount" type="number" min="0" step="1" required /></label>
-            <button type="submit" disabled>Supply</button>
-          </form>
-          <form id="borrowForm">
-            <label>Amount <input name="amount" type="number" min="0" step="1" required /></label>
-            <button type="submit" disabled>Borrow</button>
-          </form>
-          <form id="repayForm">
-            <label>Amount <input name="amount" type="number" min="0" step="1" required /></label>
-            <button type="submit" disabled>Repay</button>
-          </form>
-          <div class="log" id="txLog"></div>
+      <section class="panel control-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Treasury Actions</p>
+            <h2>Manage liquidity</h2>
+          </div>
         </div>
-        <div class="panel">
-          <h2>Pool Metrics</h2>
-          <div id="metrics" style="font-size: 1.1rem; font-weight: 500">--</div>
+        <p class="muted">Amounts are denominated in the reserve token.</p>
+        <div class="controls-grid">
+          <div class="control-card">
+            <h3>Supply assets</h3>
+            <form id="supplyForm">
+              <label>
+                <span>Amount</span>
+                <input name="amount" type="number" min="0" step="1" required />
+              </label>
+              <button type="submit" disabled>Supply</button>
+            </form>
+          </div>
+          <div class="control-card">
+            <h3>Borrow liquidity</h3>
+            <form id="borrowForm">
+              <label>
+                <span>Amount</span>
+                <input name="amount" type="number" min="0" step="1" required />
+              </label>
+              <button type="submit" disabled>Borrow</button>
+            </form>
+          </div>
+          <div class="control-card">
+            <h3>Repay debt</h3>
+            <form id="repayForm">
+              <label>
+                <span>Amount</span>
+                <input name="amount" type="number" min="0" step="1" required />
+              </label>
+              <button type="submit" disabled>Repay</button>
+            </form>
+          </div>
         </div>
-      </main>
+        <div class="log log-box" id="txLog"></div>
+      </section>
 
-      <section class="panel">
-        <h2>Tracked Positions</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Account</th>
-              <th>Supplied</th>
-              <th>Borrowed</th>
-              <th>Health</th>
-            </tr>
-          </thead>
-          <tbody id="positions"></tbody>
-        </table>
+      <section class="panel positions-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Portfolio Radar</p>
+            <h2>Tracked positions</h2>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Account</th>
+                <th>Supplied</th>
+                <th>Borrowed</th>
+                <th>Health</th>
+              </tr>
+            </thead>
+            <tbody id="positions"></tbody>
+          </table>
+        </div>
       </section>
     </div>
 
     <script>
       const API_BASE = window.API_BASE || 'http://localhost:4000';
       const statusEl = document.getElementById('status');
-      const metricsEl = document.getElementById('metrics');
       const positionsEl = document.getElementById('positions');
       const accountDisplay = document.getElementById('accountId');
       const manualAccountInput = document.getElementById('manualAccount');
@@ -236,6 +456,11 @@
       const supplyForm = document.getElementById('supplyForm');
       const borrowForm = document.getElementById('borrowForm');
       const repayForm = document.getElementById('repayForm');
+      const metricDisplays = {
+        accounts: document.querySelector('[data-metric="accounts"]'),
+        supplied: document.querySelector('[data-metric="supplied"]'),
+        borrowed: document.querySelector('[data-metric="borrowed"]')
+      };
 
       const state = {
         accountId: '',
@@ -257,6 +482,21 @@
         el.style.color = isError ? '#f87171' : '#a5f3fc';
       }
 
+      function formatNumber(value, options = {}) {
+        const number = Number(value ?? 0);
+        if (Number.isNaN(number)) {
+          return options.fallback ?? '--';
+        }
+        const formatOptions = { maximumFractionDigits: 2, ...options };
+        return number.toLocaleString('en-US', formatOptions);
+      }
+
+      function healthClass(value) {
+        if (value >= 1.5) return 'good';
+        if (value >= 1.1) return 'warn';
+        return 'danger';
+      }
+
       async function fetchJson(path, options = {}) {
         const response = await fetch(`${API_BASE}${path}`, {
           headers: { 'Content-Type': 'application/json' },
@@ -271,7 +511,15 @@
 
       async function loadMetrics() {
         const metrics = await fetchJson('/metrics');
-        metricsEl.textContent = `Accounts: ${metrics.accounts} | Supplied: ${metrics.supplied} | Borrowed: ${metrics.borrowed}`;
+        if (metricDisplays.accounts) {
+          metricDisplays.accounts.textContent = formatNumber(metrics.accounts, { maximumFractionDigits: 0 });
+        }
+        if (metricDisplays.supplied) {
+          metricDisplays.supplied.textContent = formatNumber(metrics.supplied);
+        }
+        if (metricDisplays.borrowed) {
+          metricDisplays.borrowed.textContent = formatNumber(metrics.borrowed);
+        }
         return metrics.sample || [];
       }
 
@@ -283,11 +531,18 @@
             if (!accountId) return;
             const data = await fetchJson(`/positions/${accountId}`);
             const row = document.createElement('tr');
+            const supplied = formatNumber(data.position?.supplied ?? 0);
+            const borrowed = formatNumber(data.position?.borrowed ?? 0);
+            const health = Number(data.healthFactor ?? 0);
+            const healthDisplay = Number.isFinite(health) ? health.toFixed(2) : '--';
             row.innerHTML = `
-              <td>${data.accountId}</td>
-              <td>${Number(data.position.supplied).toFixed(2)}</td>
-              <td>${Number(data.position.borrowed).toFixed(2)}</td>
-              <td>${Number(data.healthFactor).toFixed(2)}</td>
+              <td>
+                <div class="account-id">${data.accountId}</div>
+                <div class="micro">Sampled by monitor</div>
+              </td>
+              <td><span class="amount">${supplied}</span></td>
+              <td><span class="amount">${borrowed}</span></td>
+              <td><span class="pill ${healthClass(health)}">${healthDisplay}</span></td>
             `;
             positionsEl.appendChild(row);
           })

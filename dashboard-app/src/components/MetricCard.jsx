@@ -1,10 +1,9 @@
-export function MetricCard({ label, value }) {
+export function MetricCard({ label, value, subtext }) {
   return (
-    <div className="panel" style={{ textAlign: 'center' }}>
-      <div className="muted" style={{ letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-        {label}
-      </div>
-      <div style={{ fontSize: '1.8rem', fontWeight: 600 }}>{value}</div>
+    <div className="metric-card">
+      <p className="metric-label">{label}</p>
+      <p className="metric-value">{value}</p>
+      {subtext ? <p className="metric-subtext">{subtext}</p> : null}
     </div>
   );
 }

@@ -7,22 +7,46 @@ export function TxControls({ disabled, onSupply, onBorrow, onRepay, logMessage, 
     form.reset();
   }
   return (
-    <div className="panel">
-      <h2>Supply / Borrow Controls</h2>
-      <div className="muted">Amounts denominated in {tokenSymbol}</div>
-      <form onSubmit={(e) => handleSubmit(e, onSupply)}>
-        <label>Amount <input name="amount" type="number" min="0" step="1" required /></label>
-        <button type="submit" disabled={disabled}>Supply</button>
-      </form>
-      <form onSubmit={(e) => handleSubmit(e, onBorrow)}>
-        <label>Amount <input name="amount" type="number" min="0" step="1" required /></label>
-        <button type="submit" disabled={disabled}>Borrow</button>
-      </form>
-      <form onSubmit={(e) => handleSubmit(e, onRepay)}>
-        <label>Amount <input name="amount" type="number" min="0" step="1" required /></label>
-        <button type="submit" disabled={disabled}>Repay</button>
-      </form>
-      <div className="log">{logMessage}</div>
-    </div>
+    <>
+      <div className="controls-grid">
+        <div className="control-card">
+          <h3>Supply assets</h3>
+          <form onSubmit={(e) => handleSubmit(e, onSupply)}>
+            <label>
+              <span>Amount ({tokenSymbol})</span>
+              <input name="amount" type="number" min="0" step="1" required />
+            </label>
+            <button type="submit" disabled={disabled}>
+              Supply
+            </button>
+          </form>
+        </div>
+        <div className="control-card">
+          <h3>Borrow liquidity</h3>
+          <form onSubmit={(e) => handleSubmit(e, onBorrow)}>
+            <label>
+              <span>Amount ({tokenSymbol})</span>
+              <input name="amount" type="number" min="0" step="1" required />
+            </label>
+            <button type="submit" disabled={disabled}>
+              Borrow
+            </button>
+          </form>
+        </div>
+        <div className="control-card">
+          <h3>Repay debt</h3>
+          <form onSubmit={(e) => handleSubmit(e, onRepay)}>
+            <label>
+              <span>Amount ({tokenSymbol})</span>
+              <input name="amount" type="number" min="0" step="1" required />
+            </label>
+            <button type="submit" disabled={disabled}>
+              Repay
+            </button>
+          </form>
+        </div>
+      </div>
+      <div className="log log-box">{logMessage}</div>
+    </>
   );
 }

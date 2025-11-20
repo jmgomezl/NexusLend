@@ -86,3 +86,9 @@ For GitHub Pages: set `base: '/NexusLend/'` in `dashboard-app/vite.config.js`, r
 
 ## About & Technical Overview
 See [docs/ABOUT.md](docs/ABOUT.md) for a deep dive into the smart contract, KYC design, and deployment story (Render + GitHub Pages).
+
+### Technical Highlights
+- Contract `0.0.7266732` tracks supply/borrow states and enforces KYC on `borrow()` via HTS relationships.
+- Backend (Fastify + mirror node) grants KYC, fetches balances, and exposes `/kyc/status` + `/balances`.
+- Dashboard shows wallet balances, Hashscan links, and onboarding steps on top of the Render-hosted API.
+See [docs/ABOUT.md](docs/ABOUT.md) for a deep dive into the smart contract, KYC design, and deployment story (Render + GitHub Pages).
