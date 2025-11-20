@@ -675,13 +675,15 @@ code {
   }
 }
 
-@media (max-width: 900px) {
+@media (min-width: 900px) {
   .top-bar {
     position: sticky;
     top: 1rem;
     z-index: 2;
   }
+}
 
+@media (max-width: 900px) {
   .actions {
     width: 100%;
   }
