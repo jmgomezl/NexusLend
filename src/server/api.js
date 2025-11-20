@@ -3,6 +3,7 @@ import pino from 'pino';
 import { LendingService } from '../services/lendingService.js';
 import { HealthMonitor } from '../monitoring/healthMonitor.js';
 import { KycService } from '../services/kycService.js';
+import { MirrorNodeClient } from '../clients/mirrorNodeClient.js';
 import { appConfig } from '../config/environment.js';
 
 const logger = pino({ level: process.env.LOG_LEVEL || 'info', name: 'api' });
@@ -10,6 +11,7 @@ const server = fastify({ logger });
 const lendingService = new LendingService();
 const kycService = lendingService.kycService || new KycService();
 const fallbackKycKey = process.env.KYC_PRIVATE_KEY || appConfig.operatorKey;
+const mirrorClient = new MirrorNodeClient({ baseUrl: appConfig.mirrorNode });
 const monitor = new HealthMonitor({ lendingService, logger });
 monitor.start();
 
@@ -49,6 +51,16 @@ server.get('/positions/:accountId', async (request, reply) => {
   return { accountId, position, healthFactor };
 });
 
+
+server.get('/kyc/status/:accountId', async (request, reply) => {
+  const { accountId } = request.params;
+  if (!accountId) {
+    return reply.code(400).send({ error: 'accountId required' });
+  }
+  const granted = await kycService.isGranted(accountId);
+  return { accountId, granted };
+});
+
 server.post('/kyc/grant', async (request, reply) => {
   const { accountId, kycPrivateKey } = request.body || {};
   if (!accountId || !kycPrivateKey) {
@@ -58,7 +70,25 @@ server.post('/kyc/grant', async (request, reply) => {
   return { accountId, status };
 });
 
+
+server.get('/balances/:accountId', async (request, reply) => {
+  const { accountId } = request.params;
+  if (!accountId) {
+    return reply.code(400).send({ error: 'accountId required' });
+  }
+  try {
+    const account = await mirrorClient.fetchJson(`/api/v1/accounts/${accountId}`);
+    const hbar = account.balance ? account.balance.balance / 100000000 : 0;
+    const tokenEntry = account.balance?.tokens?.find((token) => token.token_id === appConfig.reserveTokenId);
+    const reserve = tokenEntry ? Number(tokenEntry.balance) / Math.pow(10, tokenEntry.decimals || 0) : 0;
+    return { accountId, hbar, reserve };
+  } catch (error) {
+    request.log.error({ err: error, accountId }, 'Balance lookup failed');
+    return reply.code(500).send({ error: error.message });
+  }
+});
 server.post('/kyc/request', async (request, reply) => {
+
   const { accountId } = request.body || {};
   if (!accountId) {
     return reply.code(400).send({ error: 'accountId required' });

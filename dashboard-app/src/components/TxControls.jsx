@@ -1,4 +1,4 @@
-export function TxControls({ disabled, onSupply, onBorrow, onRepay, logMessage }) {
+export function TxControls({ disabled, onSupply, onBorrow, onRepay, logMessage, tokenSymbol }) {
   async function handleSubmit(event, handler) {
     event.preventDefault();
     const form = event.target;
@@ -9,7 +9,7 @@ export function TxControls({ disabled, onSupply, onBorrow, onRepay, logMessage }
   return (
     <div className="panel">
       <h2>Supply / Borrow Controls</h2>
-      <div className="muted">Amounts denominated in reserve token</div>
+      <div className="muted">Amounts denominated in {tokenSymbol}</div>
       <form onSubmit={(e) => handleSubmit(e, onSupply)}>
         <label>Amount <input name="amount" type="number" min="0" step="1" required /></label>
         <button type="submit" disabled={disabled}>Supply</button>

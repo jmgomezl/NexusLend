@@ -83,3 +83,6 @@ Jest exercises lending math, liquidation workflows, config bootstrapping, and mo
 4. Once Render deploys the Fastify API, update the Vite dashboard build (`VITE_API_BASE=https://your-render-url npm run build`) and deploy the `dist/` folder (e.g., GitHub Pages).
 
 For GitHub Pages: set `base: '/NexusLend/'` in `dashboard-app/vite.config.js`, run the Vite build with the Render API URL, copy `dashboard-app/dist` into the repo’s `docs/` folder, and enable Pages → “main /docs”.
+
+## About & Technical Overview
+See [docs/ABOUT.md](docs/ABOUT.md) for a deep dive into the smart contract, KYC design, and deployment story (Render + GitHub Pages).

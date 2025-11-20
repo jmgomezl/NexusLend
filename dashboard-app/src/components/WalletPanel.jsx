@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export function WalletPanel({ accountId, status, onManualChange, onConnect, onRequestKyc, logMessage }) {
+export function WalletPanel({ accountId, status, walletInfo, onManualChange, onConnect, onRequestKyc, logMessage }) {
   return (
     <div className="panel">
       <div className="brand">
@@ -14,6 +14,8 @@ export function WalletPanel({ accountId, status, onManualChange, onConnect, onRe
       <p>
         Connected account: <strong>{accountId || 'Not connected'}</strong>
       </p>
+      <div className="muted">KYC: <strong>{walletInfo.kyc}</strong></div>
+      <div className="muted">HBAR: <strong>{walletInfo.hbar}</strong> | Reserve: <strong>{walletInfo.reserve}</strong></div>
       <label className="muted">
         Manual account override
         <input placeholder="0.0.xxxxxx" onChange={(e) => onManualChange(e.target.value.trim())} />

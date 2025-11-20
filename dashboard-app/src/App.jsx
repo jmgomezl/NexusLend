@@ -4,6 +4,7 @@ import { api } from './api.js';
 import { WalletPanel } from './components/WalletPanel.jsx';
 import { TxControls } from './components/TxControls.jsx';
 import { PositionTable } from './components/PositionTable.jsx';
+import { AboutPanel } from './components/AboutPanel.jsx';
 import { MetricsGrid } from './components/MetricsGrid.jsx';
 
 export default function App() {
@@ -12,11 +13,11 @@ export default function App() {
   const [positions, setPositions] = useState([]);
   const [kycLog, setKycLog] = useState('');
   const [txLog, setTxLog] = useState('');
+  const [walletInfo, setWalletInfo] = useState({ kyc: 'UNKNOWN', hbar: '--', reserve: '--' });
 
   async function loadData() {
     try {
       const info = await api.getMetrics();
-      setMetrics(info);
       const rows = await Promise.all((info.sample || []).map((id) => api.getPosition(id)));
       setPositions(rows);
       if (rows.length) {
@@ -39,6 +40,26 @@ export default function App() {
     const interval = setInterval(loadData, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!accountId) {
+      setWalletInfo({ kyc: 'UNKNOWN', hbar: '--', reserve: '--' });
+      return;
+    }
+    (async () => {
+      try {
+        const [kyc, balances] = await Promise.all([api.getKycStatus(accountId), api.getBalances(accountId)]);
+        setWalletInfo({
+          kyc: kyc.granted ? 'GRANTED' : 'NOT GRANTED',
+          hbar: Number(balances.hbar || 0).toFixed(2),
+          reserve: Number(balances.reserve || 0).toFixed(2)
+        });
+      } catch (error) {
+        console.error(error);
+        setWalletInfo({ kyc: 'ERROR', hbar: '--', reserve: '--' });
+      }
+    })();
+  }, [accountId]);
 
   const handleKyc = async () => {
     if (!accountId) return setKycLog('Connect wallet or enter account ID first');
@@ -87,18 +108,28 @@ export default function App() {
     }
   };
 
+  const tokenSymbol = api.tokenSymbol;
+
   return (
     <div className="page">
       <div className="hero">
         <WalletPanel
           accountId={accountId}
           status={status}
+          walletInfo={walletInfo}
           onManualChange={setAccountId}
           onConnect={requestPairing}
           onRequestKyc={handleKyc}
           logMessage={kycLog}
         />
-        <TxControls disabled={!accountId} onSupply={handleSupply} onBorrow={handleBorrow} onRepay={handleRepay} logMessage={txLog} />
+        <TxControls
+          disabled={!accountId}
+          onSupply={handleSupply}
+          onBorrow={handleBorrow}
+          onRepay={handleRepay}
+          logMessage={txLog}
+          tokenSymbol={tokenSymbol}
+        />
       </div>
       <main>
         <MetricsGrid

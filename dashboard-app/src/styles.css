@@ -118,6 +118,12 @@ th {
   color: #94a3b8;
   font-size: 0.85rem;
 }
+.risk-row {
+  background: rgba(248, 113, 113, 0.08);
+}
+.risk-row td {
+  color: #fecaca;
+}
 .log {
   font-size: 0.85rem;
   min-height: 1.2rem;
@@ -130,4 +136,10 @@ form {
   align-items: center;
   margin-top: 0.5rem;
   flex-wrap: wrap;
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
 }

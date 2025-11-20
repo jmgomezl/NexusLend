@@ -4,5 +4,7 @@
   "kycTokenId": "0.0.7266311",
   "reserveTokenId": "0.0.7266311",
   "loanTopicId": "0.0.7266346",
-  "lendingPoolContractId": "0.0.7266732"
+  "lendingPoolContractId": "0.0.7266732",
+  "reserveTokenSymbol": "HCOP",
+  "kycTokenSymbol": "HCOP"
 }
