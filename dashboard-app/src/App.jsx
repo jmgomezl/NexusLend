@@ -11,6 +11,8 @@ import { IncentiveStrip } from './components/IncentiveStrip.jsx';
 
 export default function App() {
   const { accountId, status, requestPairing, setAccountId, pairingString } = useHashConnect('testnet');
+  const reserveTokenId = import.meta.env.VITE_RESERVE_TOKEN_ID || '0.0.7266311';
+  const mirrorBase = import.meta.env.VITE_MIRROR_BASE || 'https://testnet.mirrornode.hedera.com';
   const [metrics, setMetrics] = useState({ accounts: 0, supplied: 0, borrowed: 0, sample: [], averageHealth: '--' });
   const [positions, setPositions] = useState([]);
   const [kycLog, setKycLog] = useState('');
@@ -59,21 +61,63 @@ export default function App() {
       try {
         const [kycResult, balanceResult] = await Promise.allSettled([api.getKycStatus(id), api.getBalances(id)]);
 
-        const kyc =
-          kycResult.status === 'fulfilled' ? (kycResult.value.granted ? 'GRANTED' : 'NOT GRANTED') : 'UNKNOWN';
-        const hbar =
-          balanceResult.status === 'fulfilled' ? Number(balanceResult.value.hbar || 0).toFixed(2) : '--';
-        const reserve =
-          balanceResult.status === 'fulfilled' ? Number(balanceResult.value.reserve || 0).toFixed(2) : '--';
+        let kyc =
+          kycResult.status === 'fulfilled' ? (kycResult.value.granted ? 'GRANTED' : 'NOT GRANTED') : undefined;
+        let hbar =
+          balanceResult.status === 'fulfilled' ? Number(balanceResult.value.hbar || 0).toFixed(2) : undefined;
+        let reserve =
+          balanceResult.status === 'fulfilled' ? Number(balanceResult.value.reserve || 0).toFixed(2) : undefined;
 
-        setWalletInfo({ kyc, hbar, reserve });
+        if (!kyc || !hbar || !reserve) {
+          // Mirror node fallback when API routes are unavailable
+          try {
+            const [tokenRes, accountRes] = await Promise.all([
+              fetch(`${mirrorBase}/api/v1/accounts/${id}/tokens?token.id=${reserveTokenId}`),
+              fetch(`${mirrorBase}/api/v1/accounts/${id}`)
+            ]);
+            if (tokenRes.ok) {
+              const tokens = await tokenRes.json();
+              const rel = tokens.tokens?.[0];
+              if (rel?.kyc_status) {
+                kyc = rel.kyc_status === 'GRANTED' ? 'GRANTED' : rel.kyc_status;
+              }
+              if (reserve === undefined && rel?.balance !== undefined) {
+                const decimals = rel.decimals || 0;
+                reserve = Number(rel.balance) / Math.pow(10, decimals);
+                reserve = Number.isFinite(reserve) ? reserve.toFixed(2) : '--';
+              }
+            }
+            if (accountRes.ok) {
+              const account = await accountRes.json();
+              if (hbar === undefined && account.balance?.balance !== undefined) {
+                hbar = (account.balance.balance / 100000000).toFixed(2);
+              }
+              if (reserve === undefined && account.balance?.tokens) {
+                const entry = account.balance.tokens.find((t) => t.token_id === reserveTokenId);
+                if (entry) {
+                  const decimals = entry.decimals || 0;
+                  const computed = Number(entry.balance) / Math.pow(10, decimals);
+                  reserve = Number.isFinite(computed) ? computed.toFixed(2) : '--';
+                }
+              }
+            }
+          } catch (mirrorError) {
+            console.error('Mirror fallback failed', mirrorError);
+          }
+        }
 
-        if (kycResult.status === 'rejected' && balanceResult.status === 'rejected') {
+        setWalletInfo({
+          kyc: kyc || 'UNKNOWN',
+          hbar: hbar || '--',
+          reserve: reserve || '--'
+        });
+
+        if (!kyc && !hbar && !reserve) {
           setKycLog('Account lookup failed. Check network and retry.');
-        } else if (kycResult.status === 'rejected') {
-          setKycLog('KYC lookup failed; balances loaded.');
-        } else if (balanceResult.status === 'rejected') {
-          setKycLog('Balance lookup failed; KYC loaded.');
+        } else if (kycResult.status === 'rejected' || balanceResult.status === 'rejected') {
+          setKycLog('Using mirror data; some fields may be stale.');
+        } else {
+          setKycLog('');
         }
       } catch (error) {
         console.error(error);
