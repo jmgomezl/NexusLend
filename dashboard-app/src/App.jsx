@@ -57,15 +57,27 @@ export default function App() {
       }
       setWalletInfo((current) => ({ ...current, kyc: 'CHECKING', hbar: '--', reserve: '--' }));
       try {
-        const [kyc, balances] = await Promise.all([api.getKycStatus(id), api.getBalances(id)]);
-        setWalletInfo({
-          kyc: kyc.granted ? 'GRANTED' : 'NOT GRANTED',
-          hbar: Number(balances.hbar || 0).toFixed(2),
-          reserve: Number(balances.reserve || 0).toFixed(2)
-        });
+        const [kycResult, balanceResult] = await Promise.allSettled([api.getKycStatus(id), api.getBalances(id)]);
+
+        const kyc =
+          kycResult.status === 'fulfilled' ? (kycResult.value.granted ? 'GRANTED' : 'NOT GRANTED') : 'UNKNOWN';
+        const hbar =
+          balanceResult.status === 'fulfilled' ? Number(balanceResult.value.hbar || 0).toFixed(2) : '--';
+        const reserve =
+          balanceResult.status === 'fulfilled' ? Number(balanceResult.value.reserve || 0).toFixed(2) : '--';
+
+        setWalletInfo({ kyc, hbar, reserve });
+
+        if (kycResult.status === 'rejected' && balanceResult.status === 'rejected') {
+          setKycLog('Account lookup failed. Check network and retry.');
+        } else if (kycResult.status === 'rejected') {
+          setKycLog('KYC lookup failed; balances loaded.');
+        } else if (balanceResult.status === 'rejected') {
+          setKycLog('Balance lookup failed; KYC loaded.');
+        }
       } catch (error) {
         console.error(error);
-        setKycLog('Account lookup failed. Refresh or retry once HashPack is available.');
+        setKycLog('Account lookup failed. Check network and retry.');
         setWalletInfo({ kyc: 'UNKNOWN', hbar: '--', reserve: '--' });
       }
     },
