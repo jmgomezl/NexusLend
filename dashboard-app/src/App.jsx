@@ -114,8 +114,6 @@ export default function App() {
 
         if (!kyc && !hbar && !reserve) {
           setKycLog('Account lookup failed. Check network and retry.');
-        } else if (kycResult.status === 'rejected' || balanceResult.status === 'rejected') {
-          setKycLog('Using mirror data; some fields may be stale.');
         } else {
           setKycLog('');
         }
