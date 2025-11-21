@@ -127,8 +127,32 @@ export default function App() {
     }
   };
 
+  const statusLabel = (() => {
+    switch (status) {
+      case 'CONNECTED':
+        return 'Connected to HashPack';
+      case 'READY':
+        return 'Ready to pair with HashPack';
+      case 'PAIRING':
+        return 'Waiting for HashPack approval';
+      case 'UNAVAILABLE':
+        return 'HashPack not detected; use manual account entry';
+      case 'ERROR':
+        return 'HashConnect failed to start';
+      default:
+        return 'Wallet not connected';
+    }
+  })();
+
+  const statusNote =
+    status === 'UNAVAILABLE'
+      ? 'HashPack extension is unavailable in this browser context. Paste your account ID or open the pairing link once HashPack is installed.'
+      : status === 'ERROR'
+        ? 'HashConnect hit an error. Manual override still works while you refresh or reopen HashPack.'
+        : '';
+
   const tokenSymbol = api.tokenSymbol;
-  const statusMessage = lastUpdated ? `Last sync ${lastUpdated}` : `HashConnect status: ${status}`;
+  const statusMessage = lastUpdated ? `Last sync ${lastUpdated}` : statusLabel;
   const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   const incentiveData = [
     {
@@ -202,7 +226,8 @@ export default function App() {
 
         <WalletPanel
           accountId={accountId}
-          status={status}
+          status={statusLabel}
+          statusNote={statusNote}
           walletInfo={walletInfo}
           onManualChange={setAccountId}
           onConnect={requestPairing}

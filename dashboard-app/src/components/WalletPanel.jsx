@@ -1,6 +1,7 @@
 export function WalletPanel({
   accountId,
   status,
+  statusNote,
   walletInfo,
   onManualChange,
   onConnect,
@@ -34,6 +35,7 @@ export function WalletPanel({
         </div>
       </div>
       <p className="muted">HashConnect status: {status}</p>
+      {statusNote ? <p className="helper">{statusNote}</p> : null}
       <p>
         Connected account: <strong>{accountId || 'Not connected'}</strong>
       </p>

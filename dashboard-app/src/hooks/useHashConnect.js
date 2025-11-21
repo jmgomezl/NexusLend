@@ -41,7 +41,7 @@ export function useHashConnect(network = 'testnet') {
         });
       } catch (error) {
         console.error('HashConnect init failed', error);
-        setStatus('ERROR');
+        setStatus('UNAVAILABLE');
       }
     }
     init();
