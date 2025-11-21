@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useHashConnect } from './hooks/useHashConnect.js';
 import { api } from './api.js';
 import { WalletPanel } from './components/WalletPanel.jsx';
@@ -49,14 +49,15 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (!accountId) {
-      setWalletInfo({ kyc: 'UNKNOWN', hbar: '--', reserve: '--' });
-      return;
-    }
-    (async () => {
+  const fetchWalletInfo = useCallback(
+    async (id) => {
+      if (!id) {
+        setWalletInfo({ kyc: 'UNKNOWN', hbar: '--', reserve: '--' });
+        return;
+      }
+      setWalletInfo((current) => ({ ...current, kyc: 'CHECKING', hbar: '--', reserve: '--' }));
       try {
-        const [kyc, balances] = await Promise.all([api.getKycStatus(accountId), api.getBalances(accountId)]);
+        const [kyc, balances] = await Promise.all([api.getKycStatus(id), api.getBalances(id)]);
         setWalletInfo({
           kyc: kyc.granted ? 'GRANTED' : 'NOT GRANTED',
           hbar: Number(balances.hbar || 0).toFixed(2),
@@ -64,10 +65,16 @@ export default function App() {
         });
       } catch (error) {
         console.error(error);
-        setWalletInfo({ kyc: 'ERROR', hbar: '--', reserve: '--' });
+        setKycLog('Account lookup failed. Refresh or retry once HashPack is available.');
+        setWalletInfo({ kyc: 'UNKNOWN', hbar: '--', reserve: '--' });
       }
-    })();
-  }, [accountId]);
+    },
+    [setKycLog]
+  );
+
+  useEffect(() => {
+    fetchWalletInfo(accountId);
+  }, [accountId, fetchWalletInfo]);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
@@ -86,6 +93,7 @@ export default function App() {
       setKycLog('Requesting KYC...');
       const result = await api.requestKyc(accountId);
       setKycLog(`KYC status: ${result.status}`);
+      fetchWalletInfo(accountId);
     } catch (error) {
       setKycLog(error.message);
     }
@@ -136,7 +144,7 @@ export default function App() {
       case 'PAIRING':
         return 'Waiting for HashPack approval';
       case 'UNAVAILABLE':
-        return 'HashPack not detected; use manual account entry';
+        return 'HashPack unavailable';
       case 'ERROR':
         return 'HashConnect failed to start';
       default:
@@ -146,9 +154,9 @@ export default function App() {
 
   const statusNote =
     status === 'UNAVAILABLE'
-      ? 'HashPack extension is unavailable in this browser context. Paste your account ID or open the pairing link once HashPack is installed.'
+      ? 'Paste your Hedera account ID to continue.'
       : status === 'ERROR'
-        ? 'HashConnect hit an error. Manual override still works while you refresh or reopen HashPack.'
+        ? 'Retry HashPack or paste your account ID.'
         : '';
 
   const tokenSymbol = api.tokenSymbol;
